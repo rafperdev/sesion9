@@ -31,6 +31,42 @@ export function Productos() {
         //Oculta mensaje de Guardado
         setTimeout(() => setSucces(false), 3000)
     };
+
+    function consultar() {
+        const nombre = nomRef.current.value;
+        fetch(`http://localhost:8081/producto/consultar/${nombre}`)
+            .then(res => res.json())
+            .then(res => {
+                precRef.current.value = res.price;
+                stockRef.current.value = res.height;
+            })
+    }
+    const apiProductoList = () => new Promise(
+        async function (resolve, reject) {
+            const nombre = "Basil";
+            try {
+                const result = await fetch(`http://localhost:8081/producto/consultar/${nombre}`);
+                let data = await result.json();
+                resolve(data);
+            } catch (error) {
+                reject(error);
+            }
+        });
+    const guardarEnDisco = (data) => new Promise(
+        function (resolve, reject) {
+            try {
+                localStorage.setItem("productos", JSON.stringify(data))
+            } catch (error) {
+
+            }
+        }
+    )
+
+    function guardarCache() {
+        apiProductoList()
+            .then(res => guardarEnDisco(res))
+            .catch(error => console.log(error));
+    }
     return (
         <>
             {success && <div className="alert alert-primary" role="alert">Producto guardado :)!</div>}
@@ -41,7 +77,8 @@ export function Productos() {
                 <input ref={precRef} className="form-control" type="text" />
                 <label htmlFor="">Stock</label>
                 <input ref={stockRef} className="form-control" type="text" />
-                <button className="btn btn-primary" type="button" onClick={guardar}>Guardar</button>
+                <button className="btn btn-primary" type="button" onClick={guardarCache}>Guardar</button>
+                <button className="btn btn-primary" type="button" onClick={consultar}>Consultar</button>
                 <Link to="/producto/lista">Listar</Link>
                 <Link to="/comentarios">Comentarios</Link>
             </form>
