@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export function Productos() {
@@ -9,28 +9,45 @@ export function Productos() {
     const nomRef = useRef();
     const precRef = useRef();
     const stockRef = useRef();
+    const categoriaRef = useRef();
+
+    const [listado, setListado] = useState([]);
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        fetch("http://localhost:8081/categoria/listar", {
+            headers: {
+                "content-type": "application/json",
+                "authorization": `Bearer ${token}`
+            },
+            method: "GET"
+        }).then(res => res.json())
+            .then(res => {
+                if (res.estado === "ok") { // 1 == "1"(true)  1 === "1" (false)
+                    setListado(res.data);
+                }
+            }).catch(error => console.log(error));
+    }, [])
+
     const guardar = () => {
         //Captura los datos de las cajas de texto
-        const nom = nomRef.current.value;
-        const prec = precRef.current.value;
+        const nombre = nomRef.current.value;
+        const precio = precRef.current.value;
         const stock = stockRef.current.value;
-        //Crea un objeto JSON, con los datos capturados
-        const prod = { nom, prec, stock };
-        //Obtiene los productos guardados en Local Storage
-        listadoProductos = JSON.parse(localStorage.getItem("listaProductos")) || [];
-        //Se adiciona el nuevo producto al array
-        listadoProductos.push(prod);
-        //Se guarda en local storage
-        localStorage.setItem("listaProductos", JSON.stringify(listadoProductos));
-        //Borra las cajas de texto
-        nomRef.current.value = "";
-        precRef.current.value = "";
-        stockRef.current.value = "";
-        //Muestra mensaje de Guardado
-        setSucces(true);
-        //Oculta mensaje de Guardado
-        setTimeout(() => setSucces(false), 3000)
+        const categoria = categoriaRef.current.value;
+        const token = localStorage.getItem("token");
+        fetch("http://localhost:8081/producto/guardar", {
+            headers: {
+                "content-type": "application/json",
+                "authorization": `Bearer ${token}`
+            },
+            method: "POST",
+            body: JSON.stringify({ nombre, precio, stock, categoria })
+        }).then(res => res.json())
+            .then(res => {
+                alert(res.msg);
+            })
     };
+
 
     function consultar() {
         const nombre = nomRef.current.value;
@@ -71,13 +88,20 @@ export function Productos() {
         <>
             {success && <div className="alert alert-primary" role="alert">Producto guardado :)!</div>}
             <form>
+                <label htmlFor="">Categorias</label>
+                <select ref={categoriaRef} name="" id="">
+                    <option value={0}>--Seleccione -- </option>
+                    {
+                        listado.map(p => <option key={p._id} value={p._id}>{p.nombre}</option>)
+                    }
+                </select>
                 <label htmlFor="">Nombre</label>
                 <input ref={nomRef} className="form-control" type="text" />
                 <label htmlFor="">Precio</label>
                 <input ref={precRef} className="form-control" type="text" />
                 <label htmlFor="">Stock</label>
                 <input ref={stockRef} className="form-control" type="text" />
-                <button className="btn btn-primary" type="button" onClick={guardarCache}>Guardar</button>
+                <button className="btn btn-primary" type="button" onClick={guardar}>Guardar</button>
                 <button className="btn btn-primary" type="button" onClick={consultar}>Consultar</button>
                 <Link to="/producto/lista">Listar</Link>
                 <Link to="/comentarios">Comentarios</Link>

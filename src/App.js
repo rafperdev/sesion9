@@ -10,6 +10,7 @@ import { Login } from './componentes/Login';
 import { Home } from './componentes/Home';
 import { Ventas } from './componentes/Ventas';
 import { VentasListar } from './componentes/VentasListar';
+import { Categoria } from './componentes/Categoria';
 
 function App() {
   return (
@@ -18,10 +19,12 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />}/>
           <Route path="/home" element={<Home />}/>
-          <Route path="/ventas" element={<VentasListar />}/>
+          <Route path="/ventas" element={<Ventas />}/>
+          <Route path="/ventas/listar" element={<VentasListar />}/>
           <Route path="/producto" element={<Productos />}/>
           <Route path="/producto/lista" element={<ProductList />}/>
           <Route path="/comentarios" element={<Comentarios />}/>
+          <Route path="/categoria" element={<Categoria />}/>
         </Routes>
       </BrowserRouter>
       
